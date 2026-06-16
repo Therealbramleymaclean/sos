@@ -1,0 +1,6 @@
+[submodule "dev/sos-agent/songs-of-syx-mod-example"]
+	path = dev/sos-agent/songs-of-syx-mod-example
+	url = https://github.com/4rg0n/songs-of-syx-mod-example
+[submodule "dev/sos-agent/songs-of-syx-mod-more-options"]
+	path = dev/sos-agent/songs-of-syx-mod-more-options
+	url = https://github.com/4rg0n/songs-of-syx-mod-more-options
