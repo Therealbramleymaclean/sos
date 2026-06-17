@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="maven-antrun-" default="main">
+  <target name="main">
+    <mkdir dir="/Users/bram/Library/Application Support/songsofsyx/mods/SyxAgentBridge/V71/script" />
+    <echo file="/Users/bram/Library/Application Support/songsofsyx/mods/SyxAgentBridge/_Info.txt">VERSION: "1.0.0",
+GAME_VERSION_MAJOR: 71,
+GAME_VERSION_MINOR: 0,
+NAME: "SyxAgentBridge",
+DESC: "Writes live settlement telemetry to JSON for LLM governor.",
+AUTHOR: "bram",
+INFO: "Telemetry bridge for LLM agent supervisor.",</echo>
+    <copy file="/Users/bram/Documents/GitHub/sos/dev/sos-agent/SyxAgentBridge/target/SyxAgentBridge-1.0-SNAPSHOT.jar" tofile="/Users/bram/Library/Application Support/songsofsyx/mods/SyxAgentBridge/V71/script/SyxAgentBridge.jar" overwrite="true" />
+    <echo message="Deployed to /Users/bram/Library/Application Support/songsofsyx/mods/SyxAgentBridge/V71/script/SyxAgentBridge.jar" />
+  </target>
+</project>

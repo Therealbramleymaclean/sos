@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>sos.agent</groupId>
+    <artifactId>SyxAgentBridge</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <properties>
+        <maven.compiler.release>21</maven.compiler.release>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- Where the game's mods folder lives on macOS -->
+        <mods.dir>${user.home}/Library/Application Support/songsofsyx/mods</mods.dir>
+        <mod.name>SyxAgentBridge</mod.name>
+    </properties>
+
+    <dependencies>
+        <!-- The V71 game jar, registered locally via mvn install:install-file -->
+        <dependency>
+            <groupId>sogame</groupId>
+            <artifactId>songs-of-syx</artifactId>
+            <version>71</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Jackson for JSON serialisation — bundled into our output jar -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.17.1</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- 1. Build a fat jar that includes Jackson (game won't provide it) -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.5.3</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals><goal>shade</goal></goals>
+                        <configuration>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <filters>
+                                <filter>
+                                    <!-- Strip signing manifests that cause security exceptions -->
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- 2. After package, deploy jar + _Info.txt into correct mod folder structure -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <id>deploy-to-mods</id>
+                        <phase>package</phase>
+                        <goals><goal>run</goal></goals>
+                        <configuration>
+                            <target>
+                                <!-- Create mod folder structure: ModName/V71/script/ -->
+                                <mkdir dir="${mods.dir}/${mod.name}/V71/script"/>
+
+                                <!-- Write _Info.txt to mod root -->
+                                <echo file="${mods.dir}/${mod.name}/_Info.txt">VERSION: "1.0.0",
+GAME_VERSION_MAJOR: 71,
+GAME_VERSION_MINOR: 0,
+NAME: "SyxAgentBridge",
+DESC: "Writes live settlement telemetry to JSON for LLM governor.",
+AUTHOR: "bram",
+INFO: "Telemetry bridge for LLM agent supervisor.",
+</echo>
+
+                                <!-- Copy shaded jar into V71/script/ -->
+                                <copy overwrite="true"
+                                      file="${project.build.directory}/${project.artifactId}-${project.version}.jar"
+                                      tofile="${mods.dir}/${mod.name}/V71/script/${mod.name}.jar"/>
+
+                                <echo message="Deployed to ${mods.dir}/${mod.name}/V71/script/${mod.name}.jar"/>
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
